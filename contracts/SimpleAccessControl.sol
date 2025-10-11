@@ -5,10 +5,15 @@ import "@openzeppelin/contracts/access/IAccessControl.sol";
 
 contract SimpleAccessControl is IAccessControl {
   bytes32 public constant DEFAULT_ADMIN_ROLE = 0xacce55000000000000000000ffffffffffffffffffffffffffffffffffffffff;
-  bytes32 public constant DEPOSIT_CONTRACT_ROLE = 0xc0de00000000000000000000ffffffffffffffffffffffffffffffffffffffff;
+
+  function _getRolePrefix(bytes32 role) private pure returns (bytes12) {
+    bytes12 prefix = bytes12(role);
+    require(prefix != bytes12(0), "SimpleAccessControl: zero prefix not allowed");
+    return prefix;
+  }
   
   function hasRole(bytes32 role, address account) public view override returns (bool) {
-    bytes12 prefix = bytes12(role);
+    bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
     
     uint256 value;
@@ -22,14 +27,10 @@ contract SimpleAccessControl is IAccessControl {
     return hasRole(DEFAULT_ADMIN_ROLE, account);
   }
   
-  function hasDepositRole(address account) public view returns (bool) {
-    return hasRole(DEPOSIT_CONTRACT_ROLE, account);
-  }
-  
   function grantRole(bytes32 role, address account) public override {
     require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "SimpleAccessControl: must have admin role to grant");
     
-    bytes12 prefix = bytes12(role);
+    bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
     
     assembly {
@@ -41,7 +42,7 @@ contract SimpleAccessControl is IAccessControl {
   function revokeRole(bytes32 role, address account) public override {
     require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "SimpleAccessControl: must have admin role to revoke");
     
-    bytes12 prefix = bytes12(role);
+    bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
     
     assembly {
@@ -53,7 +54,7 @@ contract SimpleAccessControl is IAccessControl {
   function renounceRole(bytes32 role, address account) public override {
     require(account == msg.sender, "SimpleAccessControl: can only renounce roles for self");
     
-    bytes12 prefix = bytes12(role);
+    bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
     
     assembly {
@@ -67,7 +68,7 @@ contract SimpleAccessControl is IAccessControl {
   }
   
   function _grantRole(bytes32 role, address account) internal {
-    bytes12 prefix = bytes12(role);
+    bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
     assembly {
       sstore(key, 1)

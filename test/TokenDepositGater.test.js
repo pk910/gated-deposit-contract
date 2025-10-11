@@ -75,6 +75,38 @@ describe("TokenDepositGater", function () {
       await tokenDepositGater.connect(admin).mint(user.address, 50);
       expect(await tokenDepositGater.balanceOf(user.address)).to.equal(50);
     });
+
+    it("Should reject zero prefix roles", async function () {
+      const zeroRole = "0x0000000000000000000000000000000000000000000000000000000000000000";
+      
+      await expect(
+        tokenDepositGater.hasRole(zeroRole, user.address)
+      ).to.be.revertedWith("SimpleAccessControl: zero prefix not allowed");
+
+      await expect(
+        tokenDepositGater.grantRole(zeroRole, user.address)
+      ).to.be.revertedWith("SimpleAccessControl: zero prefix not allowed");
+
+      await expect(
+        tokenDepositGater.revokeRole(zeroRole, user.address)
+      ).to.be.revertedWith("SimpleAccessControl: zero prefix not allowed");
+
+      await expect(
+        tokenDepositGater.connect(user).renounceRole(zeroRole, user.address)
+      ).to.be.revertedWith("SimpleAccessControl: zero prefix not allowed");
+    });
+
+    it("Should reject roles with zero prefix in first 12 bytes", async function () {
+      const zeroRole = "0x000000000000000000000000ffffffffffffffffffffffffffffffffffffffff";
+      
+      await expect(
+        tokenDepositGater.hasRole(zeroRole, user.address)
+      ).to.be.revertedWith("SimpleAccessControl: zero prefix not allowed");
+
+      await expect(
+        tokenDepositGater.grantRole(zeroRole, user.address)
+      ).to.be.revertedWith("SimpleAccessControl: zero prefix not allowed");
+    });
   });
 
   describe("check_deposit function", function () {

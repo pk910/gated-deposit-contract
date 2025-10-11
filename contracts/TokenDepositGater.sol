@@ -6,6 +6,7 @@ import "./IDepositGater.sol";
 import "./SimpleAccessControl.sol";
 
 contract TokenDepositGater is IDepositGater, SimpleAccessControl, ERC20 {
+  bytes32 public constant DEPOSIT_CONTRACT_ROLE = 0xc0de00000000000000000000ffffffffffffffffffffffffffffffffffffffff;
 
   constructor() ERC20("Deposit Token", "Deposit") {
     _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());

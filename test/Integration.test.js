@@ -123,7 +123,7 @@ describe("Integration Tests", function () {
     it("Should prevent unauthorized minting", async function () {
       await expect(
         tokenDepositGater.connect(attacker).mint(attacker.address, 1000)
-      ).to.be.revertedWith("must have admin role to mint");
+      ).to.be.revertedWith("Only admin can mint");
     });
 
     it("Should prevent direct check_deposit calls", async function () {
@@ -154,7 +154,7 @@ describe("Integration Tests", function () {
       // Should no longer be able to mint
       await expect(
         tokenDepositGater.connect(depositor1).mint(depositor2.address, 5)
-      ).to.be.revertedWith("must have admin role to mint");
+      ).to.be.revertedWith("Only admin can mint");
     });
   });
 

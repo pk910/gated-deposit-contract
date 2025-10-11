@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.21;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./IDepositGater.sol";
+import "./SimpleAccessControl.sol";
 
-contract TokenDepositGater is IDepositGater, AccessControl, ERC20 {
-  bytes32 public constant DEPOSIT_CONTRACT_ROLE = keccak256("DEPOSIT_CONTRACT_ROLE");
+contract TokenDepositGater is IDepositGater, SimpleAccessControl, ERC20 {
 
   constructor() ERC20("Deposit Token", "Deposit") {
     _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -43,7 +42,7 @@ contract TokenDepositGater is IDepositGater, AccessControl, ERC20 {
   }
 
   function mint(address to, uint256 amount) public virtual {
-    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "must have admin role to mint");
+    require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin can mint");
     _mint(to, amount);
   }
 

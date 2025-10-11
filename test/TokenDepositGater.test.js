@@ -49,7 +49,7 @@ describe("TokenDepositGater", function () {
     it("Should fail when non-admin tries to mint", async function () {
       await expect(
         tokenDepositGater.connect(user).mint(user.address, 100)
-      ).to.be.revertedWith("must have admin role to mint");
+      ).to.be.revertedWith("Only admin can mint");
     });
   });
 

@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "scripts": {
     "build": "hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "generate-verification": "node scripts/generate-verification-files.js",
+    "build-full": "npm run build && npm run generate-verification"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",

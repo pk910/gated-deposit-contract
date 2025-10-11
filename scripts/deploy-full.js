@@ -14,7 +14,7 @@ async function main() {
 
   // Deploy GatedDepositContract with the gater address
   console.log("\nDeploying GatedDepositContract...");
-  const GatedDepositContract = await hre.ethers.getContractFactory("GatedDepositContract");
+  const GatedDepositContract = await hre.ethers.getContractFactory("DepositContract");
   const gatedDepositContract = await GatedDepositContract.deploy(gaterAddress);
   await gatedDepositContract.waitForDeployment();
   const depositAddress = await gatedDepositContract.getAddress();

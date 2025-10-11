@@ -39,11 +39,28 @@ module.exports = {
 		},
 	},
 	solidity: {
-		version: "0.8.21",
+		version: "0.8.30",
 		settings: {
+			evmVersion: "prague",
 			optimizer: {
 				enabled: true,
 				runs: 2000,
+			},
+			metadata: {
+				bytecodeHash: "none",
+				useLiteralContent: true,
+			},
+			outputSelection: {
+				"*": {
+					"*": [
+						"abi",
+						"evm.bytecode",
+						"evm.deployedBytecode",
+						"evm.methodIdentifiers",
+						"metadata"
+					],
+					"": ["ast"]
+				}
 			},
 		},
 	},

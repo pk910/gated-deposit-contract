@@ -34,6 +34,10 @@ describe("GatedDepositContract", function () {
     // Grant DEPOSIT_CONTRACT_ROLE to GatedDepositContract
     const DEPOSIT_CONTRACT_ROLE = await tokenDepositGater.DEPOSIT_CONTRACT_ROLE();
     await tokenDepositGater.grantRole(DEPOSIT_CONTRACT_ROLE, await gatedDepositContract.getAddress());
+
+    // Configure noToken for topups (0xffff) so they don't require tokens
+    const TOPUP_DEPOSIT_TYPE = 0xffff;
+    await tokenDepositGater.setDepositGateConfig(TOPUP_DEPOSIT_TYPE, false, true);
   });
 
   describe("Deployment", function () {

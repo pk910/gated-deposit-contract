@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/manifoldco/promptui"
 )
 
@@ -28,6 +29,9 @@ var (
 	colorBlue   = codeBlue
 	colorCyan   = codeCyan
 	colorBold   = codeBold
+
+	// Track if colors are disabled for promptui templates
+	colorsDisabled = false
 )
 
 // disableColors turns off all color output.
@@ -39,6 +43,7 @@ func disableColors() {
 	colorBlue = ""
 	colorCyan = ""
 	colorBold = ""
+	colorsDisabled = true
 }
 
 // printSuccess prints a success message in green.
@@ -76,6 +81,15 @@ func promptText(label string, defaultVal string, validate func(string) error) (s
 		Default: defaultVal,
 	}
 
+	if colorsDisabled {
+		prompt.Templates = &promptui.PromptTemplates{
+			Prompt:  "{{ . }}: ",
+			Valid:   "{{ . }}: ",
+			Invalid: "{{ . }}: ",
+			Success: "{{ . }}: ",
+		}
+	}
+
 	if validate != nil {
 		prompt.Validate = validate
 	}
@@ -104,6 +118,56 @@ func promptPassword(label string) (string, error) {
 		},
 	}
 
+	if colorsDisabled {
+		prompt.Templates = &promptui.PromptTemplates{
+			Prompt:  "{{ . }}: ",
+			Valid:   "{{ . }}: ",
+			Invalid: "{{ . }}: ",
+			Success: "{{ . }}: ",
+		}
+	}
+
+	result, err := prompt.Run()
+	if err != nil {
+		if errors.Is(err, promptui.ErrInterrupt) {
+			return "", fmt.Errorf("interrupted")
+		}
+		return "", err
+	}
+
+	return strings.TrimSpace(result), nil
+}
+
+// promptPrivateKey prompts for a private key with validation.
+func promptPrivateKey(label string) (string, error) {
+	prompt := promptui.Prompt{
+		Label: label,
+		Mask:  '*',
+		Validate: func(input string) error {
+			input = strings.TrimSpace(input)
+			if len(input) == 0 {
+				return errors.New("private key cannot be empty")
+			}
+			// Remove 0x prefix if present
+			input = strings.TrimPrefix(input, "0x")
+			// Validate it's a valid private key
+			_, err := crypto.HexToECDSA(input)
+			if err != nil {
+				return errors.New("invalid private key format")
+			}
+			return nil
+		},
+	}
+
+	if colorsDisabled {
+		prompt.Templates = &promptui.PromptTemplates{
+			Prompt:  "{{ . }}: ",
+			Valid:   "{{ . }}: ",
+			Invalid: "{{ . }}: ",
+			Success: "{{ . }}: ",
+		}
+	}
+
 	result, err := prompt.Run()
 	if err != nil {
 		if errors.Is(err, promptui.ErrInterrupt) {
@@ -120,6 +184,15 @@ func promptConfirm(label string) (bool, error) {
 	prompt := promptui.Prompt{
 		Label:     label,
 		IsConfirm: true,
+	}
+
+	if colorsDisabled {
+		prompt.Templates = &promptui.PromptTemplates{
+			Prompt:  "{{ . }} [y/N]: ",
+			Valid:   "{{ . }} [y/N]: ",
+			Invalid: "{{ . }} [y/N]: ",
+			Success: "{{ . }}: ",
+		}
 	}
 
 	_, err := prompt.Run()
@@ -145,11 +218,21 @@ type SelectItem struct {
 
 // promptSelect shows an interactive selection menu.
 func promptSelect(label string, items []SelectItem) (int, error) {
-	templates := &promptui.SelectTemplates{
-		Label:    "{{ . }}",
-		Active:   "▸ {{ .Name | cyan | bold }}{{ if .Description }} - {{ .Description | faint }}{{ end }}",
-		Inactive: "  {{ .Name }}{{ if .Description }} - {{ .Description | faint }}{{ end }}",
-		Selected: "✔ {{ .Name | green }}",
+	var templates *promptui.SelectTemplates
+	if colorsDisabled {
+		templates = &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "> {{ .Name }}{{ if .Description }} - {{ .Description }}{{ end }}",
+			Inactive: "  {{ .Name }}{{ if .Description }} - {{ .Description }}{{ end }}",
+			Selected: "* {{ .Name }}",
+		}
+	} else {
+		templates = &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "▸ {{ .Name | cyan | bold }}{{ if .Description }} - {{ .Description | faint }}{{ end }}",
+			Inactive: "  {{ .Name }}{{ if .Description }} - {{ .Description | faint }}{{ end }}",
+			Selected: "✔ {{ .Name | green }}",
+		}
 	}
 
 	prompt := promptui.Select{
@@ -172,16 +255,28 @@ func promptSelect(label string, items []SelectItem) (int, error) {
 
 // promptSelectString shows a selection menu for string options.
 func promptSelectString(label string, options []string) (string, error) {
-	prompt := promptui.Select{
-		Label: label,
-		Items: options,
-		Size:  10,
-		Templates: &promptui.SelectTemplates{
+	var templates *promptui.SelectTemplates
+	if colorsDisabled {
+		templates = &promptui.SelectTemplates{
+			Label:    "{{ . }}",
+			Active:   "> {{ . }}",
+			Inactive: "  {{ . }}",
+			Selected: "* {{ . }}",
+		}
+	} else {
+		templates = &promptui.SelectTemplates{
 			Label:    "{{ . }}",
 			Active:   "▸ {{ . | cyan | bold }}",
 			Inactive: "  {{ . }}",
 			Selected: "✔ {{ . | green }}",
-		},
+		}
+	}
+
+	prompt := promptui.Select{
+		Label:     label,
+		Items:     options,
+		Size:      10,
+		Templates: templates,
 	}
 
 	_, result, err := prompt.Run()

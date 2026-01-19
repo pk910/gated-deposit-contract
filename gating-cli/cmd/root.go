@@ -110,7 +110,7 @@ func persistentPreRun(cmd *cobra.Command, args []string) error {
 		privateKey = os.Getenv("PRIVATE_KEY")
 	}
 	if privateKey == "" && interactive {
-		privateKey, err = promptPassword("Private key (hex)")
+		privateKey, err = promptPrivateKey("Private key (hex)")
 		if err != nil {
 			return fmt.Errorf("failed to read private key: %w", err)
 		}

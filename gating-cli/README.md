@@ -25,7 +25,7 @@ go build -o gating-cli .
 A pre-built Docker image is available:
 
 ```bash
-docker run --rm -it pk910/dev-images:gating-cli --help
+docker run --rm -it pk910/gated-deposit-contract-cli --help
 ```
 
 Or build locally:

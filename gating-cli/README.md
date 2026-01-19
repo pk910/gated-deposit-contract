@@ -25,14 +25,14 @@ go build -o gating-cli .
 A pre-built Docker image is available:
 
 ```bash
-docker run -it pk910/dev-images:gating-cli --help
+docker run --rm -it pk910/dev-images:gating-cli --help
 ```
 
 Or build locally:
 
 ```bash
 docker build -t gating-cli .
-docker run -it gating-cli --help
+docker run --rm -it gating-cli --help
 ```
 
 ## Usage

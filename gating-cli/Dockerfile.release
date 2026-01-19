@@ -1,0 +1,8 @@
+# Minimal release Dockerfile - expects pre-built binary at ./gating-cli
+FROM alpine:3.21
+
+RUN apk add --no-cache ca-certificates
+
+COPY gating-cli /usr/local/bin/gating-cli
+
+ENTRYPOINT ["gating-cli"]

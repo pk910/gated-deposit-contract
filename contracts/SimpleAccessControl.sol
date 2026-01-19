@@ -15,12 +15,23 @@ contract SimpleAccessControl is IAccessControl {
   function hasRole(bytes32 role, address account) public view override returns (bool) {
     bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
-    
+
     uint256 value;
     assembly {
       value := sload(key)
     }
-    return value == 1;
+    return value >= 1;
+  }
+
+  function isStickyRole(bytes32 role, address account) public view returns (bool) {
+    bytes12 prefix = _getRolePrefix(role);
+    bytes32 key = bytes32(abi.encodePacked(prefix, account));
+
+    uint256 value;
+    assembly {
+      value := sload(key)
+    }
+    return value == 2;
   }
   
   function hasAdminRole(address account) public view returns (bool) {
@@ -41,10 +52,11 @@ contract SimpleAccessControl is IAccessControl {
   
   function revokeRole(bytes32 role, address account) public override {
     require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "SimpleAccessControl: must have admin role to revoke");
-    
+    require(!isStickyRole(role, account), "SimpleAccessControl: cannot revoke sticky role");
+
     bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
-    
+
     assembly {
       sstore(key, 0)
     }
@@ -53,10 +65,10 @@ contract SimpleAccessControl is IAccessControl {
   
   function renounceRole(bytes32 role, address account) public override {
     require(account == msg.sender, "SimpleAccessControl: can only renounce roles for self");
-    
+
     bytes12 prefix = _getRolePrefix(role);
     bytes32 key = bytes32(abi.encodePacked(prefix, account));
-    
+
     assembly {
       sstore(key, 0)
     }

@@ -13,9 +13,13 @@ contract TokenDepositGater is IDepositGater, SimpleAccessControl, ERC20 {
   // Value bits: 0x01 = blocked, 0x02 = noToken
   bytes30 private constant GATE_SETTINGS_PREFIX = 0x676174650000000000000000000000000000000000000000000000000000;
 
+  // Storage key for custom gater address: "custgater" (0x6375737467617465720000...)
+  bytes32 private constant CUSTOM_GATER_KEY = 0x6375737467617465720000000000000000000000000000000000000000000000;
+
   uint16 public constant TOPUP_DEPOSIT_TYPE = 0xffff;
 
   event DepositGateConfigChanged(uint16 indexed depositType, bool blocked, bool noToken);
+  event CustomGaterChanged(address indexed oldGater, address indexed newGater);
 
   constructor() ERC20("Deposit Token", "Deposit") {
     _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
@@ -49,6 +53,22 @@ contract TokenDepositGater is IDepositGater, SimpleAccessControl, ERC20 {
     emit DepositGateConfigChanged(depositType, blocked, noToken);
   }
 
+  function getCustomGater() public view returns (address gater) {
+    bytes32 key = CUSTOM_GATER_KEY;
+    assembly {
+      gater := sload(key)
+    }
+  }
+
+  function setCustomGater(address gater) public onlyAdmin {
+    address oldGater = getCustomGater();
+    bytes32 key = CUSTOM_GATER_KEY;
+    assembly {
+      sstore(key, gater)
+    }
+    emit CustomGaterChanged(oldGater, gater);
+  }
+
   function isAllZero(bytes calldata data, uint256 expectedLength) internal pure returns (bool) {
     if (data.length != expectedLength) return false;
     for (uint256 i = 0; i < data.length; ++i) {
@@ -59,6 +79,14 @@ contract TokenDepositGater is IDepositGater, SimpleAccessControl, ERC20 {
 
   function check_deposit(address sender, bytes calldata pubkey, bytes calldata withdrawal_credentials, bytes calldata signature, uint256 amount) public returns (bool) {
     require(hasRole(DEPOSIT_CONTRACT_ROLE, _msgSender()), "Only deposit contract can call this function");
+
+    // check custom gater first if set
+    address customGater = getCustomGater();
+    if (customGater != address(0)) {
+      if (IDepositGater(customGater).check_deposit(sender, pubkey, withdrawal_credentials, signature, amount)) {
+        return true;
+      }
+    }
 
     // check if this is a top-up deposit (signature = 96 zero bytes)
     bool isTopUp = isAllZero(signature, 96) && isAllZero(withdrawal_credentials, 32);

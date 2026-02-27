@@ -9,7 +9,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┗┛━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-pragma solidity ^0.8.21;
+pragma solidity >=0.6.8 <0.7.0;
 
 import "./IDepositGater.sol";
 
@@ -83,7 +83,7 @@ contract DepositContract is IDepositContract, ERC165 {
         depositGater = gater;
     }
 
-    function get_deposit_root() override external view returns (bytes32) {
+    function get_deposit_root() external view override returns (bytes32) {
         bytes32 node;
         uint size = deposit_count;
         for (uint height = 0; height < DEPOSIT_CONTRACT_TREE_DEPTH; height++) {
@@ -100,7 +100,7 @@ contract DepositContract is IDepositContract, ERC165 {
         ));
     }
 
-    function get_deposit_count() override external view returns (bytes memory) {
+    function get_deposit_count() external view override returns (bytes memory) {
         return to_little_endian_64(uint64(deposit_count));
     }
 
@@ -109,7 +109,7 @@ contract DepositContract is IDepositContract, ERC165 {
         bytes calldata withdrawal_credentials,
         bytes calldata signature,
         bytes32 deposit_data_root
-    ) override external payable {
+    ) external payable override {
         // Extended ABI length checks since dynamic types are used.
         require(pubkey.length == 48, "DepositContract: invalid pubkey length");
         require(withdrawal_credentials.length == 32, "DepositContract: invalid withdrawal_credentials length");
@@ -169,7 +169,7 @@ contract DepositContract is IDepositContract, ERC165 {
         assert(false);
     }
 
-    function supportsInterface(bytes4 interfaceId) override external pure returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure override returns (bool) {
         return interfaceId == type(ERC165).interfaceId || interfaceId == type(IDepositContract).interfaceId;
     }
 

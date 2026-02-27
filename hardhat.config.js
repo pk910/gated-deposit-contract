@@ -39,29 +39,58 @@ module.exports = {
 		},
 	},
 	solidity: {
-		version: "0.8.30",
-		settings: {
-			evmVersion: "prague",
-			optimizer: {
-				enabled: true,
-				runs: 2000,
+		compilers: [
+			{
+				version: "0.6.11",
+				settings: {
+					optimizer: {
+						enabled: true,
+						runs: 5000000,
+					},
+					metadata: {
+						bytecodeHash: "none",
+						useLiteralContent: true,
+					},
+					outputSelection: {
+						"*": {
+							"*": [
+								"abi",
+								"evm.bytecode",
+								"evm.deployedBytecode",
+								"evm.methodIdentifiers",
+								"metadata"
+							],
+							"": ["ast"]
+						}
+					},
+				},
 			},
-			metadata: {
-				bytecodeHash: "none",
-				useLiteralContent: true,
+			{
+				version: "0.8.30",
+				settings: {
+					evmVersion: "istanbul",
+					optimizer: {
+						enabled: true,
+						runs: 2000,
+					},
+					metadata: {
+						bytecodeHash: "none",
+						useLiteralContent: true,
+					},
+					outputSelection: {
+						"*": {
+							"*": [
+								"abi",
+								"evm.bytecode",
+								"evm.deployedBytecode",
+								"evm.methodIdentifiers",
+								"metadata"
+							],
+							"": ["ast"]
+						}
+					},
+				},
 			},
-			outputSelection: {
-				"*": {
-					"*": [
-						"abi",
-						"evm.bytecode",
-						"evm.deployedBytecode",
-						"evm.methodIdentifiers",
-						"metadata"
-					],
-					"": ["ast"]
-				}
-			},
-		},
+		],
 	},
 };

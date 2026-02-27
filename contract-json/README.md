@@ -12,7 +12,6 @@ For each contract, two files are generated:
 ## Available Contracts
 
 - **DepositContract** - The main gated deposit contract (from GatedDepositContract.sol)
-- **SimpleAccessControl** - Access control implementation
 - **TokenDepositGater** - Token-based deposit gating mechanism
 
 ## Usage for Verification
@@ -27,12 +26,18 @@ For each contract, two files are generated:
 
 ### Compiler Settings Used
 
+**DepositContract** (matches the original Eth2 deposit contract build):
+- **Solidity Version**: 0.6.11
+- **Optimization**: Enabled (5,000,000 runs)
+- **EVM Version**: Istanbul (default for solc 0.6.11)
+
+**TokenDepositGater**:
 - **Solidity Version**: 0.8.30
-- **Optimization**: Enabled (2000 runs)
-- **EVM Version**: Prague
-- **Metadata**: 
-  - bytecodeHash: none (for reproducible builds)
-  - useLiteralContent: true
+- **Optimization**: Enabled (2,000 runs)
+- **EVM Version**: Istanbul
+
+**Common settings**:
+- **Metadata**: bytecodeHash: none (for reproducible builds), useLiteralContent: true
 
 ## Regenerating Files
 
